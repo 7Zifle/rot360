@@ -1,0 +1,22 @@
+[package]
+name = "rot360"
+version = "0.0.1"
+authors = ["efernau <e.fernau@efero.de>", "deadly_platypus <mail@geth.systems>", "nicola-sorace", "r3"]
+license = "MIT"
+description = "automatic display rotation using built-in accelerometer"
+homepage = "https://github.com/7Zifle/rot360"
+documentation = "https://github.com/7Zifle/rot360"
+repository = "https://github.com/7Zifle/rot360"
+keywords = ["sway", "display", "rotation"]
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.0.18", features = ["derive"] }
+glob = "0.3"
+regex = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[profile.release]
+strip = true
+lto = true
