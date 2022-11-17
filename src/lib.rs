@@ -1,7 +1,5 @@
-use clap::Arg;
 use clap::Parser;
 use glob::glob;
-use serde::Deserialize;
 use serde_json::Value;
 use std::error::Error;
 use std::fs;
@@ -10,7 +8,7 @@ use std::process::Command;
 use std::thread;
 use std::time::Duration;
 
-const ROT8_VERSION: &str = env!("CARGO_PKG_VERSION");
+
 
 #[derive(PartialEq)]
 pub enum Backend {
@@ -40,7 +38,7 @@ pub struct Config {
     // Factor to normalize axis' value
     #[arg(long, default_value_t=1000000.0)]
     normalization_factor: f32,
-    // disable keyboard
+    // option to disable keyboard
     #[arg(long)]
     keyboard: bool,
 }
@@ -89,44 +87,11 @@ fn detect_backend() -> Result<Backend, String> {
     }
 }
 
-#[derive(Deserialize)]
-struct SwayOutput {
-    name: String,
-    transform: String,
-}
-
-
-fn get_window_server_rotation_state(display: &str) -> Result<String, String> {
-    let raw_rotation_state = String::from_utf8(
-        Command::new("swaymsg")
-            .arg("-t")
-            .arg("get_outputs")
-            .arg("--raw")
-            .output()
-            .expect("Swaymsg get outputs command failed to start")
-            .stdout,
-    )
-        .unwrap();
-    let deserialized: Vec<SwayOutput> = serde_json::from_str(&raw_rotation_state)
-        .expect("Unable to deserialize swaymsg JSON output");
-    for output in deserialized {
-        if output.name == display {
-            return Ok(output.transform);
-        }
-    }
-
-    Err(format!(
-        "Unable to determine rotation state: display {} not found in 'swaymsg -t get_outputs'",
-        display
-    ))
-}
 
 #[derive(Copy, Clone)]
 struct Orientation {
     vector: (f32, f32),
     sway_state: &'static str,
-    x_state: &'static str,
-    matrix: [&'static str; 9],
 }
 
 impl Orientation {
@@ -135,26 +100,18 @@ impl Orientation {
             Orientation {
                 vector: (0.0, -1.0),
                 sway_state: "normal",
-                x_state: "normal",
-                matrix: ["1", "0", "0", "0", "1", "0", "0", "0", "1"],
             },
             Orientation {
                 vector: (0.0, 1.0),
                 sway_state: "180",
-                x_state: "inverted",
-                matrix: ["-1", "0", "1", "0", "-1", "1", "0", "0", "1"],
             },
             Orientation {
                 vector: (-1.0, 0.0),
                 sway_state: "90",
-                x_state: "right",
-                matrix: ["0", "1", "0", "-1", "0", "1", "0", "0", "1"],
             },
             Orientation {
                 vector: (1.0, 0.0),
                 sway_state: "270",
-                x_state: "left",
-                matrix: ["0", "-1", "1", "1", "0", "0", "0", "0", "1"],
             },
         ];
 

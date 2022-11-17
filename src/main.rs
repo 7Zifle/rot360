@@ -1,9 +1,5 @@
-use std::fs;
-use std::process::Command;
-
 use clap::Parser;
-use rot8::{Backend, Accelerometer, Config};
-
+use rot360::{Accelerometer, Config};
 
 fn main() -> Result<(), String> {
     let config = Config::parse();
